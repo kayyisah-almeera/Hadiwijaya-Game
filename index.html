@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kutukan Hadiwijaya - Rahasia Kota Maut</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body, html {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background-color: #000;
+      font-family: 'Courier New', Courier, monospace;
+      color: #fff;
+      user-select: none;
+    }
+    #canvas-container { width: 100vw; height: 100vh; }
+    
+    /* Crosshair Center */
+    #crosshair {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 4px; height: 4px;
+      background: rgba(255, 50, 50, 0.8);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 10;
+      box-shadow: 0 0 6px #f00;
+    }
+
+    /* Horror Vignette & Filter Overlay */
+    #overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      box-shadow: inset 0 0 120px rgba(0,0,0,0.95);
+      z-index: 2;
+      background: radial-gradient(circle, transparent 60%, rgba(20,0,0,0.6) 100%);
+    }
+
+    /* UI HUD & Status */
+    #hud {
+      position: absolute;
+      top: 20px; left: 20px;
+      z-index: 5;
+      font-size: 13px;
+      color: #aaa;
+      text-shadow: 2px 2px 4px #000;
+      background: rgba(0,0,0,0.5);
+      padding: 12px;
+      border-left: 2px solid #880000;
+    }
+    #hud span { color: #ff3333; font-weight: bold; }
+
+    /* Stamina & Flashlight Bars */
+    .status-bar {
+      width: 150px;
+      height: 8px;
+      background: #222;
+      border: 1px solid #444;
+      margin-top: 4px;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    #stamina-fill { width: 100%; height: 100%; background: #22aa22; transition: width 0.1s; }
+    #battery-fill { width: 100%; height: 100%; background: #00aaff; transition: width 0.1s; }
+
+    /* Inventory HUD */
+    #inventory-hud {
+      position: absolute;
+      top: 20px; right: 20px;
+      z-index: 5;
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px solid #440000;
+      padding: 10px 15px;
+      font-size: 12px;
+      color: #ddd;
+      text-align: right;
+    }
+    #inventory-list { color: #ffaa00; margin-top: 5px; font-weight: bold; }
+
+    /* Interaction Prompt */
+    #interact-prompt {
+      position: absolute;
+      top: 58%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(20, 0, 0, 0.85);
+      color: #ffcccc;
+      padding: 10px 20px;
+      border: 1px solid #aa0000;
+      border-radius: 4px;
+      font-size: 13px;
+      display: none;
+      z-index: 10;
+      letter-spacing: 1px;
+      box-shadow: 0 0 10px rgba(255,0,0,0.3);
+    }
+
+    /* Dialog / Story Note Box */
+    #dialog-box {
+      position: absolute;
+      bottom: 40px; left: 50%;
+      transform: translateX(-50%);
+      width: 85%; max-width: 800px;
+      background: rgba(12, 2, 2, 0.95);
+      border: 2px solid #880000;
+      padding: 22px;
+      border-radius: 6px;
+      display: none;
+      z-index: 15;
+      box-shadow: 0 0 30px rgba(255,0,0,0.4);
+    }
+    #dialog-title {
+      font-size: 18px;
+      color: #ff3333;
+      font-weight: bold;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #440000;
+      padding-bottom: 5px;
+      letter-spacing: 1px;
+    }
+    #dialog-content {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #ddd;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+    #dialog-next {
+      margin-top: 15px;
+      font-size: 12px;
+      color: #888;
+      text-align: right;
+    }
+
+    /* Start / Menu Screen */
+    #start-screen {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle, #200000 0%, #000000 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 30;
+      text-align: center;
+      padding: 20px;
+    }
+    #start-screen h1 {
+      font-size: 3.2rem;
+      color: #cc0000;
+      letter-spacing: 8px;
+      margin-bottom: 10px;
+      text-shadow: 0 0 20px #f00;
+    }
+    #start-screen h2 {
+      font-size: 1.1rem;
+      color: #aaa;
+      margin-bottom: 25px;
+      font-weight: normal;
+      letter-spacing: 2px;
+    }
+    #start-screen .story-intro {
+      max-width: 700px;
+      font-size: 0.92rem;
+      line-height: 1.8;
+      color: #bbb;
+      margin-bottom: 30px;
+      background: rgba(0,0,0,0.6);
+      padding: 20px;
+      border-left: 4px solid #aa0000;
+      text-align: left;
+    }
+    #controls-hint {
+      margin-bottom: 25px;
+      font-size: 0.85rem;
+      color: #888;
+    }
+    #start-btn {
+      padding: 14px 40px;
+      font-size: 1.1rem;
+      background: #770000;
+      color: #fff;
+      border: 1px solid #ff4444;
+      cursor: pointer;
+      font-family: inherit;
+      letter-spacing: 3px;
+      transition: all 0.3s ease;
+    }
+    #start-btn:hover {
+      background: #bb0000;
+      box-shadow: 0 0 20px #f00;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="canvas-container"></div>
+  <div id="crosshair"></div>
+  <div id="overlay"></div>
+
+  <div id="hud">
+    POV: <span>Shannon (Dokter Saraf)</span> & <span>Shinon (Dokter Bedah)</span><br>
+    Lokasi: <span id="location-text">Gerbang Luar Kota Maut</span>
+    <div style="margin-top: 8px;">Stamina:</div>
+    <div class="status-bar"><div id="stamina-fill"></div></div>
+    <div style="margin-top: 6px;">Baterai Senter:</div>
+    <div class="status-bar"><div id="battery-fill"></div></div>
+  </div>
+
+  <div id="inventory-hud">
+    <b>INVENTARIS TAS:</b>
+    <div id="inventory-list">- Kosong -</div>
+  </div>
+
+  <div id="interact-prompt">[ E ] Periksa / Ambil / Buka</div>
+
+  <div id="dialog-box">
+    <div id="dialog-title">Judul Objek</div>
+    <div id="dialog-content">Isi narasi cerita...</div>
+    <div id="dialog-next">Tekan [ SPACE ] untuk menutup</div>
+  </div>
+
+  <div id="start-screen">
+    <h1>KUTUKAN HADIWIJAYA</h1>
+    <h2>Misteri Pembantaian Kota Maut</h2>
+    <div class="story-intro">
+      Kamu adalah <b>Shannon</b> (Dokter Spesialis Saraf), bersama adik kembar mu <b>Shinon</b> (Dokter Spesialis Bedah).<br><br>
+      Kalian berdua datang menelusuri kota terpencil ini setelah mendengar desas-desus hilangnya ratusan penduduk secara misterius. Namun saat melintasi gerbang, <b>bau pembusukan busuk luar biasa</b> langsung menyeruak ke udara.<br><br>
+      Cari petunjuk, buka pintu-pintu terisolasi, dan temukan siapa dalang di balik tradisi medis mengerikan di kota ini.
+    </div>
+    <div id="controls-hint">
+      <b>KONTROL:</b> [W,A,S,D] Bergerak | [SHIFT] Lari | [F] Hidupkan/Matikan Senter | [E] Interaksi | [SPACE] Tutup Dialog
+    </div>
+    <button id="start-btn">MEMASUKI KOTA</button>
+  </div>
+
+  <!-- Three.js & PointerLockControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
+
+  <script>
+    // ==========================================
+    // 1. SYSTEM AUDIO HOROR (Web Audio API)
+    // ==========================================
+    let audioCtx, ambientGain, HeartbeatGain;
+
+    function initHorrorAudio() {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      
+      // Low Ambient Drone (Bass Horor)
+      const droneOsc = audioCtx.createOscillator();
+      const filter = audioCtx.createBiquadFilter();
+      ambientGain = audioCtx.createGain();
+
+      droneOsc.type = 'sawtooth';
+      droneOsc.frequency.setValueAtTime(38, audioCtx.currentTime); // Low frequency
+
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(120, audioCtx.currentTime);
+
+      ambientGain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+
+      droneOsc.connect(filter);
+      filter.connect(ambientGain);
+      ambientGain.connect(audioCtx.destination);
+      droneOsc.start();
+
+      // Pulsasi eerie LFO
+      const lfo = audioCtx.createOscillator();
+      const lfoGain = audioCtx.createGain();
+      lfo.frequency.setValueAtTime(0.1, audioCtx.currentTime);
+      lfoGain.gain.setValueAtTime(40, audioCtx.currentTime);
+      lfo.connect(filter.frequency);
+      lfo.start();
+    }
+
+    function playSoundEffect(type) {
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+
+      if (type === 'click') {
+        // Senter Click
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(100, now + 0.05);
+        g.gain.setValueAtTime(0.3, now);
+        g.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.start(now); osc.stop(now + 0.05);
+      } else if (type === 'pickup') {
+        // Ambil Kunci/Item
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.2);
+        g.gain.setValueAtTime(0.4, now);
+        g.gain.linearRampToValueAtTime(0.01, now + 0.2);
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.start(now); osc.stop(now + 0.2);
+      } else if (type === 'door') {
+        // Buka Pintu
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(90, now);
+        osc.frequency.linearRampToValueAtTime(40, now + 0.8);
+        g.gain.setValueAtTime(0.3, now);
+        g.gain.linearRampToValueAtTime(0.01, now + 0.8);
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.start(now); osc.stop(now + 0.8);
+      }
+    }
+
+
+    // ==========================================
+    // 2. STATE GAME & INVENTARIS
+    // ==========================================
+    let scene, camera, renderer, controls, flashlight, flashlightTarget;
+    let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false, isSprinting = false;
+    let prevTime = performance.now();
+    const velocity = new THREE.Vector3();
+    const direction = new THREE.Vector3();
+
+    let stamina = 100;
+    let battery = 100;
+    let flashlightOn = true;
+
+    const inventory = [];
+    let currentInteractable = null;
+    let isDialogActive = false;
+
+    const raycaster = new THREE.Raycaster();
+    const interactables = [];
+
+    // Data Pintu & Objek
+    let gate1Mesh, gate2Mesh;
+
+
+    // ==========================================
+    // 3. STORY EVENTS & ITEM DATA
+    // ==========================================
+    const storyData = {
+      'smell_intro': {
+        title: "Aroma Pembusukan Stadium Akhir",
+        text: "<b>Shannon (Dokter Saraf):</b> *Uhuk!* Bau busuk ini... benar-benar melumpuhkan indera penciuman! Ini bukan sekadar bau sampah, ini pembusukan jaringan organ tubuh manusia dalam jumlah masif!<br><br><b>Shinon (Dokter Bedah):</b> 'Bahkan sebelum kita memasuki perbatasan kota, baunya sudah menyengat sampai ke jalan raya. Shannon, perhatikan sekeliling... jalan menuju sektor dalam dikunci dengan pintu besi tua. Kita harus mencari kuncinya di pos medis terdekat.'",
+        type: 'note'
+      },
+      'key_pos': {
+        title: "Kunci Sektor Pos Medis",
+        text: "Kamu menemukan sebuah kunci berbahan kuningan tua yang berdarah di atas meja bedah darurat.<br><br><i>[ Berhasil mengambil: Kunci Pos Medis ]</i>",
+        type: 'item',
+        itemId: 'kunci_pos',
+        itemName: 'Kunci Pos Medis'
+      },
+      'gate_pos': {
+        title: "Pintu Besi Pos Medis",
+        text: "Pintu besi kokoh mengunci jalan menuju lorong tengah kota.",
+        type: 'door',
+        requires: 'kunci_pos',
+        targetMeshName: 'gate1'
+      },
+      'worker_npc': {
+        title: "Pekerja Pembuang Mayat",
+        text: "<b>Pekerja Teror:</b> 'Jangan sentuh saya! Jangan mendekat! Saya cuma dibayar mahal buat membersihkan usus, tengkorak, dan bangkai manusia ini ke jurang! TAPI BAYARANNYA MILYARAN RUPIAH! Mana tahan saya... setiap malam ada jeritan dari Mansion Utama!'<br><br><b>Shinon (Dokter Bedah):</b> 'Lihat potongan di rongga dada mayat-mayat ini. Bukaannya rapi sekali... ini dikerjakan oleh alat bedah medis kelas atas! Pekerja, siapa yang menyuruhmu?!'<br><br><b>Pekerja Teror:</b> 'Saya tidak tahu nama pastinya! Tapi dia memberikan kunci sektor Altar ini pada saya! Ambil ini dan pergi dari sini!'<br><br><i>[ Berhasil mendapatkan: Kunci Gerbang Altar ]</i>",
+        type: 'npc_item',
+        itemId: 'kunci_altar',
+        itemName: 'Kunci Gerbang Altar'
+      },
+      'skulls_note': {
+        title: "Tumpukan Tengkorak & Pembembedahan Saraf",
+        text: "<b>Shannon (Dokter Saraf):</b> 'Tunggu... coba lihat tengkorak-tengkorak yang berserakan ini! Saraf lobus frontalis dan batang otaknya dipotong dengan metode *Tractotomy* kuno. Hanya ada satu dinasti kedokteran yang menggunakan teknik eksperimen terlarang ini di awal abad ke-20...'<br><br><b>Shinon:</b> 'Maksudmu... teknik yang ditulis di jurnal eksperimen kuno milik kakek buyut kita?!'",
+        type: 'note'
+      },
+      'gate_altar': {
+        title: "Gerbang Mansion Altar Utama",
+        text: "Gerbang besi hitam raksasa menuju Mansion Utama kota.",
+        type: 'door',
+        requires: 'kunci_altar',
+        targetMeshName: 'gate2'
+      },
+      'final_altar': {
+        title: "JURNAL KELAM HADIWIJAYA (AKHIR MISTERI)",
+        text: "<b>Dokumen Kuno Silsilah & Eksperimen Organ:</b><br><i>'Tahun 1912 - Demi mempertahankan keabadian dan kecerdasan otak keturunan HADIWIJAYA, ekstraksi jaringan otak & ekstrak organ warga kota harus terus dilakukan secara berkala. Wariskan ilmu bedah saraf ini kepada penerus kita... Shannon & Shinon.'</i><br><br><b>Shannon:</b> 'Nggak... NGGAK MUNGKIN! HADIWIJAYA?! Ini nama marga kita, Shinon! KELUARGA KITA LOKASI DALANG DI BALIK PEMBANTAIAN KOTA INI?!'<br><br><b>Shinon:</b> 'Seluruh beasiswa kedokteran kita... alat bedah mewah kita... semuanya dibiayai dari darah dan organ warga kota ini... Kita adalah keturunan dari monster pembantai ini...'",
+        type: 'note',
+        isEnding: true
+      }
+    };
+
+
+    // ==========================================
+    // 4. INISIALISASI THREE.JS & SCENE
+    // ==========================================
+    function init() {
+      const container = document.getElementById('canvas-container');
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x030101);
+      scene.fog = new THREE.FogExp2(0x060202, 0.035); // Kabut merah pekat
+
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 1.7, 5);
+
+      // Lighting Lingkungan (Gelap)
+      const ambientLight = new THREE.AmbientLight(0x150808, 0.6);
+      scene.add(ambientLight);
+
+      // Senter (SpotLight)
+      flashlight = new THREE.SpotLight(0xfff5ea, 3.5, 28, Math.PI / 6, 0.4, 1);
+      flashlight.castShadow = true;
+      camera.add(flashlight);
+
+      flashlightTarget = new THREE.Object3D();
+      flashlightTarget.position.set(0, 0, -1);
+      camera.add(flashlightTarget);
+      flashlight.target = flashlightTarget;
+
+      scene.add(camera);
+
+      // Renderer
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      container.appendChild(renderer.domElement);
+
+      controls = new THREE.PointerLockControls(camera, document.body);
+
+      // Build Map World & Objects
+      buildMapWorld();
+
+      setupEvents();
+    }
+
+
+    // ==========================================
+    // 5. PEMBUATAN PETA & OBJEK 3D
+    // ==========================================
+    function buildMapWorld() {
+      // Materials
+      const groundMat = new THREE.MeshStandardMaterial({ color: 0x110c0c, roughness: 0.9 });
+      const wallMat = new THREE.MeshStandardMaterial({ color: 0x1a1212, roughness: 0.8 });
+      const doorMat = new THREE.MeshStandardMaterial({ color: 0x330000, metalness: 0.8, roughness: 0.3 });
+      const goreMat = new THREE.MeshStandardMaterial({ color: 0x660000, roughness: 0.2 });
+      const boneMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.5 });
+      const tableMat = new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.5 });
+
+      // Ground / Lantai Peta
+      const ground = new THREE.Mesh(new THREE.PlaneGeometry(120, 300), groundMat);
+      ground.rotation.x = -Math.PI / 2;
+      ground.position.z = -100;
+      scene.add(ground);
+
+      // --- DINDING LORONG UTAMA (Membuat Map Terisolasi) ---
+      const createWall = (w, h, d, x, y, z) => {
+        const wall = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), wallMat);
+        wall.position.set(x, y, z);
+        scene.add(wall);
+      };
+
+      // Dinding Luar Kiri Kanan Lorong
+      for (let z = 10; z >= -220; z -= 20) {
+        createWall(2, 8, 20, -12, 4, z);
+        createWall(2, 8, 20, 12, 4, z);
+      }
+
+      // --- SEKTOR 1: GERBANG AWAL & POS MEDIS (Z: 0 s/d -40) ---
+      // Pos Medis (Rumah Kecil di Kanan Z: -20)
+      createWall(8, 6, 10, 8, 3, -20);
+      
+      // Meja Bedah Pos Medis
+      const table = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 3), tableMat);
+      table.position.set(7, 0.5, -20);
+      scene.add(table);
+
+      // ITEM: Kunci Pos Medis di Meja
+      const keyMesh1 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.1, 0.3), new THREE.MeshBasicMaterial({ color: 0xffaa00 }));
+      keyMesh1.position.set(7, 1.1, -20);
+      keyMesh1.name = 'key_pos';
+      keyMesh1.userData = storyData['key_pos'];
+      scene.add(keyMesh1);
+      interactables.push(keyMesh1);
+
+      // CATATAN 1: Aroma Pembusukan (Awal Z: -5)
+      const note1 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.6, 0.1), new THREE.MeshBasicMaterial({ color: 0xdddddd }));
+      note1.position.set(-3, 1.5, -5);
+      note1.userData = storyData['smell_intro'];
+      scene.add(note1);
+      interactables.push(note1);
+
+      // GERBANG 1 (Menghalangi Lorong di Z: -40)
+      gate1Mesh = new THREE.Mesh(new THREE.BoxGeometry(22, 7, 0.8), doorMat);
+      gate1Mesh.position.set(0, 3.5, -40);
+      gate1Mesh.name = 'gate1';
+      gate1Mesh.userData = storyData['gate_pos'];
+      scene.add(gate1Mesh);
+      interactables.push(gate1Mesh);
+
+
+      // --- SEKTOR 2: AREA PEMBUANG MAYAT & WORKER (Z: -40 s/d -110) ---
+      // Pekerja NPC (Sosok Hitam di Z: -75)
+      const workerMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 2), new THREE.MeshStandardMaterial({ color: 0x111111 }));
+      workerMesh.position.set(2, 1, -75);
+      workerMesh.userData = storyData['worker_npc'];
+      scene.add(workerMesh);
+      interactables.push(workerMesh);
+
+      // Gerobak Mayat
+      const cart = new THREE.Mesh(new THREE.BoxGeometry(3, 1.2, 2), tableMat);
+      cart.position.set(0, 0.6, -75);
+      scene.add(cart);
+
+      // Tumpukan Tengkorak & Usus (Z: -100)
+      for (let i = 0; i < 20; i++) {
+        const skull = new THREE.Mesh(new THREE.SphereGeometry(0.25, 8, 8), boneMat);
+        skull.position.set(-6 + Math.random() * 6, 0.2, -98 + Math.random() * 5);
+        scene.add(skull);
+
+        const blood = new THREE.Mesh(new THREE.SphereGeometry(0.4, 6, 6), goreMat);
+        blood.scale.set(1.5, 0.2, 1.2);
+        blood.position.set(-6 + Math.random() * 6, 0.05, -98 + Math.random() * 5);
+        scene.add(blood);
+      }
+
+      // CATATAN 2: Tengkorak Saraf (Z: -100)
+      const note2 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), boneMat);
+      note2.position.set(-3, 0.5, -100);
+      note2.userData = storyData['skulls_note'];
+      scene.add(note2);
+      interactables.push(note2);
+
+      // GERBANG 2: Gerbang Altar (Menghalangi Z: -120)
+      gate2Mesh = new THREE.Mesh(new THREE.BoxGeometry(22, 8, 0.8), doorMat);
+      gate2Mesh.position.set(0, 4, -120);
+      gate2Mesh.name = 'gate2';
+      gate2Mesh.userData = storyData['gate_altar'];
+      scene.add(gate2Mesh);
+      interactables.push(gate2Mesh);
+
+
+      // --- SEKTOR 3: MANSION & ALTAR UTAMA HADIWIJAYA (Z: -120 s/d -170) ---
+      // Ruang Altar Besar
+      createWall(26, 12, 1, 0, 6, -170); // Dinding Belakang Mansion
+      
+      // Meja Altar Utama Rahasia
+      const altarTable = new THREE.Mesh(new THREE.BoxGeometry(5, 1.2, 2.5), new THREE.MeshStandardMaterial({ color: 0x2a0000 }));
+      altarTable.position.set(0, 0.6, -160);
+      scene.add(altarTable);
+
+      // Lampu Merah Mistik Altar
+      const redLight = new THREE.PointLight(0xff0000, 3, 20);
+      redLight.position.set(0, 4, -160);
+      scene.add(redLight);
+
+      // OBJEK AKHIR: Dokumen Jurnal Hadiwijaya
+      const finalDoc = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.1, 0.6), new THREE.MeshStandardMaterial({ color: 0xff3333, emissive: 0x330000 }));
+      finalDoc.position.set(0, 1.3, -160);
+      finalDoc.userData = storyData['final_altar'];
+      scene.add(finalDoc);
+      interactables.push(finalDoc);
+    }
+
+
+    // ==========================================
+    // 6. CONTROL & LOGIKA INPUT
+    // ==========================================
+    function setupEvents() {
+      const startBtn = document.getElementById('start-btn');
+      const startScreen = document.getElementById('start-screen');
+
+      startBtn.addEventListener('click', () => {
+        startScreen.style.display = 'none';
+        controls.lock();
+        initHorrorAudio();
+      });
+
+      controls.addEventListener('unlock', () => {
+        if (!isDialogActive) {
+          startScreen.style.display = 'flex';
+        }
+      });
+
+      const onKeyDown = (e) => {
+        switch (e.code) {
+          case 'KeyW': moveForward = true; break;
+          case 'KeyS': moveBackward = true; break;
+          case 'KeyA': moveLeft = true; break;
+          case 'KeyD': moveRight = true; break;
+          case 'ShiftLeft': case 'ShiftRight': isSprinting = true; break;
+          case 'KeyF': toggleFlashlight(); break;
+          case 'KeyE': interact(); break;
+          case 'Space': closeDialog(); break;
+        }
+      };
+
+      const onKeyUp = (e) => {
+        switch (e.code) {
+          case 'KeyW': moveForward = false; break;
+          case 'KeyS': moveBackward = false; break;
+          case 'KeyA': moveLeft = false; break;
+          case 'KeyD': moveRight = false; break;
+          case 'ShiftLeft': case 'ShiftRight': isSprinting = false; break;
+        }
+      };
+
+      document.addEventListener('keydown', onKeyDown);
+      document.addEventListener('keyup', onKeyUp);
+      window.addEventListener('resize', onWindowResize);
+    }
+
+    function toggleFlashlight() {
+      if (battery <= 0) return;
+      flashlightOn = !flashlightOn;
+      flashlight.visible = flashlightOn;
+      playSoundEffect('click');
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+
+    // ==========================================
+    // 7. EKSPLORASI & INTERAKSI RAYCASTER
+    // ==========================================
+    function checkRaycastInteraction() {
+      if (isDialogActive) return;
+
+      // Raycast dari tengah kamera
+      raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+      const intersects = raycaster.intersectObjects(interactables);
+
+      const promptEl = document.getElementById('interact-prompt');
+
+      if (intersects.length > 0 && intersects[0].distance < 4.5) {
+        currentInteractable = intersects[0].object;
+        promptEl.style.display = 'block';
+      } else {
+        currentInteractable = null;
+        promptEl.style.display = 'none';
+      }
+
+      // Update Teks Lokasi di HUD
+      const z = camera.position.z;
+      const locText = document.getElementById('location-text');
+      if (z > -40) locText.innerText = "Gerban Luar & Pos Medis";
+      else if (z > -120) locText.innerText = "Sektor Terisolasi / Tempat Pembuangan Mayat";
+      else locText.innerText = "Mansion Altar Utama HADIWIJAYA";
+    }
+
+    function interact() {
+      if (!currentInteractable || isDialogActive) return;
+
+      const data = currentInteractable.userData;
+
+      if (data.type === 'note') {
+        openDialog(data.title, data.text);
+      } 
+      else if (data.type === 'item') {
+        inventory.push(data.itemId);
+        updateInventoryHUD();
+        playSoundEffect('pickup');
+        openDialog(data.title, data.text);
+
+        // Hapus item dari peta
+        scene.remove(currentInteractable);
+        const idx = interactables.indexOf(currentInteractable);
+        if (idx > -1) interactables.splice(idx, 1);
+      }
+      else if (data.type === 'npc_item') {
+        if (!inventory.includes(data.itemId)) {
+          inventory.push(data.itemId);
+          updateInventoryHUD();
+          playSoundEffect('pickup');
+        }
+        openDialog(data.title, data.text);
+      }
+      else if (data.type === 'door') {
+        if (inventory.includes(data.requires)) {
+          playSoundEffect('door');
+          openDialog("Pintu Terbuka", "Kamu menggunakan kunci untuk membuka pintu ini.");
+          
+          // Buka / Naikkan pintu ke atas
+          if (currentInteractable.name === 'gate1') gate1Mesh.position.y += 8;
+          if (currentInteractable.name === 'gate2') gate2Mesh.position.y += 8;
+
+          // Hapus interaksi pintu
+          const idx = interactables.indexOf(currentInteractable);
+          if (idx > -1) interactables.splice(idx, 1);
+        } else {
+          openDialog(data.title, data.text + "<br><br><b style='color:#ff3333;'>[ TERKUNCI - Membutuhkan " + data.requires + " ]</b>");
+        }
+      }
+    }
+
+    function updateInventoryHUD() {
+      const listEl = document.getElementById('inventory-list');
+      if (inventory.length === 0) {
+        listEl.innerText = "- Kosong -";
+      } else {
+        listEl.innerHTML = inventory.map(i => "• " + i.toUpperCase()).join("<br>");
+      }
+    }
+
+    function openDialog(title, text) {
+      isDialogActive = true;
+      controls.unlock();
+      document.getElementById('dialog-title').innerText = title;
+      document.getElementById('dialog-content').innerHTML = text;
+      document.getElementById('dialog-box').style.display = 'block';
+      document.getElementById('interact-prompt').style.display = 'none';
+    }
+
+    function closeDialog() {
+      if (isDialogActive) {
+        document.getElementById('dialog-box').style.display = 'none';
+        isDialogActive = false;
+        controls.lock();
+      }
+    }
+
+
+    // ==========================================
+    // 8. GAME LOOP & ANIMASI
+    // ==========================================
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const time = performance.now();
+      if (controls.isLocked) {
+        const delta = (time - prevTime) / 1000;
+
+        // --- Stamina & Sprint ---
+        let speedMultiplier = 1.0;
+        if (isSprinting && stamina > 0 && (moveForward || moveBackward || moveLeft || moveRight)) {
+          speedMultiplier = 1.8;
+          stamina = Math.max(0, stamina - delta * 25);
+        } else {
+          stamina = Math.min(100, stamina + delta * 15);
+        }
+        document.getElementById('stamina-fill').style.width = stamina + '%';
+
+        // --- Baterai Senter ---
+        if (flashlightOn) {
+          battery = Math.max(0, battery - delta * 1.2);
+          document.getElementById('battery-fill').style.width = battery + '%';
+
+          // Senter redup / flickering saat baterai habis
+          if (battery < 20 && Math.random() < 0.1) {
+            flashlight.intensity = Math.random() * 1.5;
+          } else if (battery <= 0) {
+            flashlightOn = false;
+            flashlight.visible = false;
+          } else {
+            flashlight.intensity = 3.5;
+          }
+        }
+
+        // --- Pergerakan Player ---
+        velocity.x -= velocity.x * 10.0 * delta;
+        velocity.z -= velocity.z * 10.0 * delta;
+
+        direction.z = Number(moveForward) - Number(moveBackward);
+        direction.x = Number(moveRight) - Number(moveLeft);
+        direction.normalize();
+
+        const moveSpeed = 14.0 * speedMultiplier;
+        if (moveForward || moveBackward) velocity.z -= direction.z * moveSpeed * delta;
+        if (moveLeft || moveRight) velocity.x -= direction.x * moveSpeed * delta;
+
+        controls.moveRight(-velocity.x * delta);
+        controls.moveForward(-velocity.z * delta);
+
+        // Batas Peta Jalan Lorong (Collision Sederhana)
+        camera.position.x = Math.max(-9, Math.min(9, camera.position.x));
+        camera.position.z = Math.max(-165, Math.min(8, camera.position.z));
+
+        // Cek Interaksi Raycast
+        checkRaycastInteraction();
+      }
+
+      prevTime = time;
+      renderer.render(scene, camera);
+    }
+
+    // Jalankan Game
+    init();
+    animate();
+  </script>
+</body>
+</html>
