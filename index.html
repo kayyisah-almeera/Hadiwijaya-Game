@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kutukan Hadiwijaya - Rahasia Kota Maut</title>
+  <title>Kutukan Hadiwijaya - Kota Maut 3D</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body, html {
       width: 100%; height: 100%;
       overflow: hidden;
-      background-color: #000;
+      background-color: #050208;
       font-family: 'Courier New', Courier, monospace;
       color: #fff;
       user-select: none;
@@ -21,22 +21,22 @@
       position: absolute;
       top: 50%; left: 50%;
       width: 4px; height: 4px;
-      background: rgba(255, 50, 50, 0.8);
+      background: rgba(255, 60, 60, 0.9);
       border-radius: 50%;
       transform: translate(-50%, -50%);
       pointer-events: none;
       z-index: 10;
-      box-shadow: 0 0 6px #f00;
+      box-shadow: 0 0 8px #f00;
     }
 
-    /* Horror Vignette & Filter Overlay */
+    /* Horror Vignette & Atmospheric Filter */
     #overlay {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
       pointer-events: none;
-      box-shadow: inset 0 0 120px rgba(0,0,0,0.95);
+      box-shadow: inset 0 0 130px rgba(0,0,0,0.9);
       z-index: 2;
-      background: radial-gradient(circle, transparent 60%, rgba(20,0,0,0.6) 100%);
+      background: radial-gradient(circle, transparent 55%, rgba(15, 3, 5, 0.7) 100%);
     }
 
     /* UI HUD & Status */
@@ -45,38 +45,40 @@
       top: 20px; left: 20px;
       z-index: 5;
       font-size: 13px;
-      color: #aaa;
+      color: #ccc;
       text-shadow: 2px 2px 4px #000;
-      background: rgba(0,0,0,0.5);
-      padding: 12px;
-      border-left: 2px solid #880000;
+      background: rgba(5, 2, 8, 0.65);
+      padding: 14px;
+      border-left: 3px solid #aa0000;
+      backdrop-filter: blur(2px);
     }
-    #hud span { color: #ff3333; font-weight: bold; }
+    #hud span { color: #ff4444; font-weight: bold; }
 
     /* Stamina & Flashlight Bars */
     .status-bar {
-      width: 150px;
+      width: 160px;
       height: 8px;
-      background: #222;
-      border: 1px solid #444;
+      background: #111;
+      border: 1px solid #333;
       margin-top: 4px;
       border-radius: 2px;
       overflow: hidden;
     }
-    #stamina-fill { width: 100%; height: 100%; background: #22aa22; transition: width 0.1s; }
-    #battery-fill { width: 100%; height: 100%; background: #00aaff; transition: width 0.1s; }
+    #stamina-fill { width: 100%; height: 100%; background: #22aa33; transition: width 0.1s; }
+    #battery-fill { width: 100%; height: 100%; background: #0088ff; transition: width 0.1s; }
 
     /* Inventory HUD */
     #inventory-hud {
       position: absolute;
       top: 20px; right: 20px;
       z-index: 5;
-      background: rgba(0, 0, 0, 0.6);
-      border: 1px solid #440000;
-      padding: 10px 15px;
+      background: rgba(5, 2, 8, 0.65);
+      border: 1px solid #660000;
+      padding: 12px 18px;
       font-size: 12px;
       color: #ddd;
       text-align: right;
+      backdrop-filter: blur(2px);
     }
     #inventory-list { color: #ffaa00; margin-top: 5px; font-weight: bold; }
 
@@ -85,39 +87,39 @@
       position: absolute;
       top: 58%; left: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(20, 0, 0, 0.85);
+      background: rgba(25, 3, 3, 0.9);
       color: #ffcccc;
-      padding: 10px 20px;
-      border: 1px solid #aa0000;
+      padding: 10px 22px;
+      border: 1px solid #cc0000;
       border-radius: 4px;
       font-size: 13px;
       display: none;
       z-index: 10;
       letter-spacing: 1px;
-      box-shadow: 0 0 10px rgba(255,0,0,0.3);
+      box-shadow: 0 0 15px rgba(255,0,0,0.4);
     }
 
-    /* Dialog / Story Note Box */
+    /* Dialog Box */
     #dialog-box {
       position: absolute;
       bottom: 40px; left: 50%;
       transform: translateX(-50%);
-      width: 85%; max-width: 800px;
-      background: rgba(12, 2, 2, 0.95);
+      width: 85%; max-width: 820px;
+      background: rgba(10, 2, 5, 0.95);
       border: 2px solid #880000;
-      padding: 22px;
+      padding: 24px;
       border-radius: 6px;
       display: none;
       z-index: 15;
-      box-shadow: 0 0 30px rgba(255,0,0,0.4);
+      box-shadow: 0 0 35px rgba(255,0,0,0.4);
     }
     #dialog-title {
-      font-size: 18px;
+      font-size: 19px;
       color: #ff3333;
       font-weight: bold;
       margin-bottom: 10px;
-      border-bottom: 1px solid #440000;
-      padding-bottom: 5px;
+      border-bottom: 1px solid #550000;
+      padding-bottom: 6px;
       letter-spacing: 1px;
     }
     #dialog-content {
@@ -138,7 +140,7 @@
     #start-screen {
       position: absolute;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: radial-gradient(circle, #200000 0%, #000000 100%);
+      background: radial-gradient(circle, #250308 0%, #030005 100%);
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -148,28 +150,28 @@
       padding: 20px;
     }
     #start-screen h1 {
-      font-size: 3.2rem;
-      color: #cc0000;
+      font-size: 3.4rem;
+      color: #dd0000;
       letter-spacing: 8px;
       margin-bottom: 10px;
-      text-shadow: 0 0 20px #f00;
+      text-shadow: 0 0 25px #f00;
     }
     #start-screen h2 {
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       color: #aaa;
       margin-bottom: 25px;
       font-weight: normal;
       letter-spacing: 2px;
     }
     #start-screen .story-intro {
-      max-width: 700px;
-      font-size: 0.92rem;
+      max-width: 720px;
+      font-size: 0.94rem;
       line-height: 1.8;
       color: #bbb;
       margin-bottom: 30px;
-      background: rgba(0,0,0,0.6);
-      padding: 20px;
-      border-left: 4px solid #aa0000;
+      background: rgba(0,0,0,0.65);
+      padding: 22px;
+      border-left: 4px solid #bb0000;
       text-align: left;
     }
     #controls-hint {
@@ -178,9 +180,9 @@
       color: #888;
     }
     #start-btn {
-      padding: 14px 40px;
-      font-size: 1.1rem;
-      background: #770000;
+      padding: 14px 45px;
+      font-size: 1.15rem;
+      background: #880000;
       color: #fff;
       border: 1px solid #ff4444;
       cursor: pointer;
@@ -189,8 +191,8 @@
       transition: all 0.3s ease;
     }
     #start-btn:hover {
-      background: #bb0000;
-      box-shadow: 0 0 20px #f00;
+      background: #cc0000;
+      box-shadow: 0 0 25px #f00;
     }
   </style>
 </head>
@@ -202,8 +204,8 @@
 
   <div id="hud">
     POV: <span>Shannon (Dokter Saraf)</span> & <span>Shinon (Dokter Bedah)</span><br>
-    Lokasi: <span id="location-text">Gerbang Luar Kota Maut</span>
-    <div style="margin-top: 8px;">Stamina:</div>
+    Lokasi: <span id="location-text">Pinggiran Kota Terpencil</span>
+    <div style="margin-top: 10px;">Stamina:</div>
     <div class="status-bar"><div id="stamina-fill"></div></div>
     <div style="margin-top: 6px;">Baterai Senter:</div>
     <div class="status-bar"><div id="battery-fill"></div></div>
@@ -226,14 +228,14 @@
     <h1>KUTUKAN HADIWIJAYA</h1>
     <h2>Misteri Pembantaian Kota Maut</h2>
     <div class="story-intro">
-      Kamu adalah <b>Shannon</b> (Dokter Spesialis Saraf), bersama adik kembar mu <b>Shinon</b> (Dokter Spesialis Bedah).<br><br>
-      Kalian berdua datang menelusuri kota terpencil ini setelah mendengar desas-desus hilangnya ratusan penduduk secara misterius. Namun saat melintasi gerbang, <b>bau pembusukan busuk luar biasa</b> langsung menyeruak ke udara.<br><br>
-      Cari petunjuk, buka pintu-pintu terisolasi, dan temukan siapa dalang di balik tradisi medis mengerikan di kota ini.
+      Kamu adalah <b>Shannon</b> (Dokter Spesialis Saraf), bersama adik kembarmu <b>Shinon</b> (Dokter Spesialis Bedah).<br><br>
+      Kalian berdua datang menelusuri kota tua ini setelah mendengar kabar hilangnya ratusan warga secara misterius. Namun saat melintasi batas kota di bawah siluet bulan merah, <b>bau busuk pembusukan organ manusia</b> langsung menyengat udara...<br><br>
+      Jelajahi sudut-sudut kota, buka jalan yang terkunci, dan temukan dalang di balik tradisi medis mengerikan di kota ini.
     </div>
     <div id="controls-hint">
-      <b>KONTROL:</b> [W,A,S,D] Bergerak | [SHIFT] Lari | [F] Hidupkan/Matikan Senter | [E] Interaksi | [SPACE] Tutup Dialog
+      <b>KONTROL:</b> [W,A,S,D] Bergerak | [SHIFT] Lari | [F] Senter On/Off | [E] Interaksi | [SPACE] Tutup Dialog
     </div>
-    <button id="start-btn">MEMASUKI KOTA</button>
+    <button id="start-btn">MASUKI KOTA MAUT</button>
   </div>
 
   <!-- Three.js & PointerLockControls -->
@@ -244,21 +246,20 @@
     // ==========================================
     // 1. SYSTEM AUDIO HOROR (Web Audio API)
     // ==========================================
-    let audioCtx, ambientGain, HeartbeatGain;
+    let audioCtx, ambientGain;
 
     function initHorrorAudio() {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       
-      // Low Ambient Drone (Bass Horor)
       const droneOsc = audioCtx.createOscillator();
       const filter = audioCtx.createBiquadFilter();
       ambientGain = audioCtx.createGain();
 
       droneOsc.type = 'sawtooth';
-      droneOsc.frequency.setValueAtTime(38, audioCtx.currentTime); // Low frequency
+      droneOsc.frequency.setValueAtTime(35, audioCtx.currentTime); 
 
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(120, audioCtx.currentTime);
+      filter.frequency.setValueAtTime(110, audioCtx.currentTime);
 
       ambientGain.gain.setValueAtTime(0.25, audioCtx.currentTime);
 
@@ -267,11 +268,10 @@
       ambientGain.connect(audioCtx.destination);
       droneOsc.start();
 
-      // Pulsasi eerie LFO
       const lfo = audioCtx.createOscillator();
       const lfoGain = audioCtx.createGain();
-      lfo.frequency.setValueAtTime(0.1, audioCtx.currentTime);
-      lfoGain.gain.setValueAtTime(40, audioCtx.currentTime);
+      lfo.frequency.setValueAtTime(0.08, audioCtx.currentTime);
+      lfoGain.gain.setValueAtTime(45, audioCtx.currentTime);
       lfo.connect(filter.frequency);
       lfo.start();
     }
@@ -281,17 +281,15 @@
       const now = audioCtx.currentTime;
 
       if (type === 'click') {
-        // Senter Click
         const osc = audioCtx.createOscillator();
         const g = audioCtx.createGain();
-        osc.frequency.setValueAtTime(800, now);
-        osc.frequency.exponentialRampToValueAtTime(100, now + 0.05);
+        osc.frequency.setValueAtTime(850, now);
+        osc.frequency.exponentialRampToValueAtTime(120, now + 0.05);
         g.gain.setValueAtTime(0.3, now);
         g.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
         osc.connect(g); g.connect(audioCtx.destination);
         osc.start(now); osc.stop(now + 0.05);
       } else if (type === 'pickup') {
-        // Ambil Kunci/Item
         const osc = audioCtx.createOscillator();
         const g = audioCtx.createGain();
         osc.type = 'sine';
@@ -302,12 +300,11 @@
         osc.connect(g); g.connect(audioCtx.destination);
         osc.start(now); osc.stop(now + 0.2);
       } else if (type === 'door') {
-        // Buka Pintu
         const osc = audioCtx.createOscillator();
         const g = audioCtx.createGain();
         osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(90, now);
-        osc.frequency.linearRampToValueAtTime(40, now + 0.8);
+        osc.frequency.setValueAtTime(80, now);
+        osc.frequency.linearRampToValueAtTime(35, now + 0.8);
         g.gain.setValueAtTime(0.3, now);
         g.gain.linearRampToValueAtTime(0.01, now + 0.8);
         osc.connect(g); g.connect(audioCtx.destination);
@@ -317,7 +314,7 @@
 
 
     // ==========================================
-    // 2. STATE GAME & INVENTARIS
+    // 2. STATE GAME & VARIABLE UTAMA
     // ==========================================
     let scene, camera, renderer, controls, flashlight, flashlightTarget;
     let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false, isSprinting = false;
@@ -335,56 +332,56 @@
 
     const raycaster = new THREE.Raycaster();
     const interactables = [];
+    const flickeringLights = [];
 
-    // Data Pintu & Objek
     let gate1Mesh, gate2Mesh;
 
 
     // ==========================================
-    // 3. STORY EVENTS & ITEM DATA
+    // 3. STORY DATA
     // ==========================================
     const storyData = {
       'smell_intro': {
         title: "Aroma Pembusukan Stadium Akhir",
-        text: "<b>Shannon (Dokter Saraf):</b> *Uhuk!* Bau busuk ini... benar-benar melumpuhkan indera penciuman! Ini bukan sekadar bau sampah, ini pembusukan jaringan organ tubuh manusia dalam jumlah masif!<br><br><b>Shinon (Dokter Bedah):</b> 'Bahkan sebelum kita memasuki perbatasan kota, baunya sudah menyengat sampai ke jalan raya. Shannon, perhatikan sekeliling... jalan menuju sektor dalam dikunci dengan pintu besi tua. Kita harus mencari kuncinya di pos medis terdekat.'",
+        text: "<b>Shannon (Dokter Saraf):</b> *Uhuk!* Bau busuk ini... benar-benar melumpuhkan indera penciuman! Ini bukan sekadar bau sampah, ini pembusukan jaringan organ tubuh manusia dalam jumlah masif!<br><br><b>Shinon (Dokter Bedah):</b> 'Bahkan sebelum kita memasuki gerbang kota, baunya sudah menyengat sampai ke jalan luar. Shannon, lihat jalan menuju sektor dalam... dipasangi pintu besi tua. Kita harus mencari kuncinya di pos kesehatan/klinik tua dekat sini.'",
         type: 'note'
       },
       'key_pos': {
         title: "Kunci Sektor Pos Medis",
-        text: "Kamu menemukan sebuah kunci berbahan kuningan tua yang berdarah di atas meja bedah darurat.<br><br><i>[ Berhasil mengambil: Kunci Pos Medis ]</i>",
+        text: "Kamu menemukan kunci kuningan berkarat yang ternoda darah di atas meja klinik.<br><br><i>[ Berhasil mengambil: Kunci Pos Medis ]</i>",
         type: 'item',
         itemId: 'kunci_pos',
         itemName: 'Kunci Pos Medis'
       },
       'gate_pos': {
-        title: "Pintu Besi Pos Medis",
-        text: "Pintu besi kokoh mengunci jalan menuju lorong tengah kota.",
+        title: "Pintu Besi Pembatas Sektor 1",
+        text: "Pintu besi berkarat mengunci akses ke area pembuangan tengah kota.",
         type: 'door',
         requires: 'kunci_pos',
         targetMeshName: 'gate1'
       },
       'worker_npc': {
         title: "Pekerja Pembuang Mayat",
-        text: "<b>Pekerja Teror:</b> 'Jangan sentuh saya! Jangan mendekat! Saya cuma dibayar mahal buat membersihkan usus, tengkorak, dan bangkai manusia ini ke jurang! TAPI BAYARANNYA MILYARAN RUPIAH! Mana tahan saya... setiap malam ada jeritan dari Mansion Utama!'<br><br><b>Shinon (Dokter Bedah):</b> 'Lihat potongan di rongga dada mayat-mayat ini. Bukaannya rapi sekali... ini dikerjakan oleh alat bedah medis kelas atas! Pekerja, siapa yang menyuruhmu?!'<br><br><b>Pekerja Teror:</b> 'Saya tidak tahu nama pastinya! Tapi dia memberikan kunci sektor Altar ini pada saya! Ambil ini dan pergi dari sini!'<br><br><i>[ Berhasil mendapatkan: Kunci Gerbang Altar ]</i>",
+        text: "<b>Pekerja Teror:</b> 'Jangan dekat-dekat! Saya cuma dibayar mahal buat membersihkan bangkai manusia, usus, dan tengkorak ini ke jurang! TAPI BAYARANNYA MAHAL BANGET! Mana tahan saya... setiap malam ada jeritan eksperimen dari Mansion Utama!'<br><br><b>Shinon (Dokter Bedah):</b> 'Bukaan sayatan di dada mayat ini rapi sekali. Ini bukan pembunuhan liar, ini pembedahan medis profesional! Pekerja, siapa penguasamu?!'<br><br><b>Pekerja Teror:</b> 'Saya tidak berani sebut nama! Tapi ini kunci akses ke Mansion Altar Utama... Ambil dan jangan ganggu saya lagi!'<br><br><i>[ Berhasil mendapatkan: Kunci Gerbang Altar ]</i>",
         type: 'npc_item',
         itemId: 'kunci_altar',
         itemName: 'Kunci Gerbang Altar'
       },
       'skulls_note': {
-        title: "Tumpukan Tengkorak & Pembembedahan Saraf",
-        text: "<b>Shannon (Dokter Saraf):</b> 'Tunggu... coba lihat tengkorak-tengkorak yang berserakan ini! Saraf lobus frontalis dan batang otaknya dipotong dengan metode *Tractotomy* kuno. Hanya ada satu dinasti kedokteran yang menggunakan teknik eksperimen terlarang ini di awal abad ke-20...'<br><br><b>Shinon:</b> 'Maksudmu... teknik yang ditulis di jurnal eksperimen kuno milik kakek buyut kita?!'",
+        title: "Tumpukan Tengkorak & Pemotongan Saraf",
+        text: "<b>Shannon (Dokter Saraf):</b> 'Tengkorak-tengkorak ini dilubangi presisi di bagian lobus frontalis. Saraf otaknya diisolasi dengan metode *Tractotomy* kuno. Hanya sedikit dinasti kedokteran di dunia yang menguasai teknik terlarang ini...'<br><br><b>Shinon:</b> 'Shannon... metode ini persis seperti yang ada di buku riset kuno milik keluarga kita!'",
         type: 'note'
       },
       'gate_altar': {
         title: "Gerbang Mansion Altar Utama",
-        text: "Gerbang besi hitam raksasa menuju Mansion Utama kota.",
+        text: "Gerbang besi raksasa menuju Mansion Altar Utama.",
         type: 'door',
         requires: 'kunci_altar',
         targetMeshName: 'gate2'
       },
       'final_altar': {
-        title: "JURNAL KELAM HADIWIJAYA (AKHIR MISTERI)",
-        text: "<b>Dokumen Kuno Silsilah & Eksperimen Organ:</b><br><i>'Tahun 1912 - Demi mempertahankan keabadian dan kecerdasan otak keturunan HADIWIJAYA, ekstraksi jaringan otak & ekstrak organ warga kota harus terus dilakukan secara berkala. Wariskan ilmu bedah saraf ini kepada penerus kita... Shannon & Shinon.'</i><br><br><b>Shannon:</b> 'Nggak... NGGAK MUNGKIN! HADIWIJAYA?! Ini nama marga kita, Shinon! KELUARGA KITA LOKASI DALANG DI BALIK PEMBANTAIAN KOTA INI?!'<br><br><b>Shinon:</b> 'Seluruh beasiswa kedokteran kita... alat bedah mewah kita... semuanya dibiayai dari darah dan organ warga kota ini... Kita adalah keturunan dari monster pembantai ini...'",
+        title: "JURNAL RAHASIA HADIWIJAYA (AKHIR MISTERI)",
+        text: "<b>Jurnal Bedah & Silsilah Keturunan:</b><br><i>'Tahun 1912 - Demi mempertahankan keabadian kecerdasan dan kekuatan fisik keturunan HADIWIJAYA, ekstraksi jaringan otak & organ warga kota harus terus dilakukan secara rutin. Wariskan tradisi dan keahlian bedah ini kepada penerus tercinta: Shannon & Shinon.'</i><br><br><b>Shannon:</b> 'NGGAK MUNGKIN... HADIWIJAYA?! Ini nama MARGA KELUARGA KITA, Shinon! KITA LOKASI DALANG DI BALIK PEMBANTAIAN DAN TRADISI GILA KOTA INI?!'<br><br><b>Shinon:</b> 'Semua ilmu bedah, dana pendidikan, dan kehidupan kita... berasal dari penderitaan warga kota ini... Kita adalah bagian dari monster ini...'",
         type: 'note',
         isEnding: true
       }
@@ -392,24 +389,25 @@
 
 
     // ==========================================
-    // 4. INISIALISASI THREE.JS & SCENE
+    // 4. INISIALISASI THREE.JS & LANGIT KOTA
     // ==========================================
     function init() {
       const container = document.getElementById('canvas-container');
 
       scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x030101);
-      scene.fog = new THREE.FogExp2(0x060202, 0.035); // Kabut merah pekat
+      // Warna Langit Malam Berkabut (Dark Violet/Indigo Night)
+      scene.background = new THREE.Color(0x0a0512);
+      scene.fog = new THREE.FogExp2(0x0c0716, 0.022); // Kabut tipis malam hari agar skyline kota terlihat
 
       camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
       camera.position.set(0, 1.7, 5);
 
-      // Lighting Lingkungan (Gelap)
-      const ambientLight = new THREE.AmbientLight(0x150808, 0.6);
+      // Pencahayaan Ambience Malam Kusam
+      const ambientLight = new THREE.AmbientLight(0x221528, 0.7);
       scene.add(ambientLight);
 
-      // Senter (SpotLight)
-      flashlight = new THREE.SpotLight(0xfff5ea, 3.5, 28, Math.PI / 6, 0.4, 1);
+      // Senter Player (SpotLight)
+      flashlight = new THREE.SpotLight(0xfffaed, 3.8, 30, Math.PI / 5.5, 0.45, 1);
       flashlight.castShadow = true;
       camera.add(flashlight);
 
@@ -429,92 +427,192 @@
 
       controls = new THREE.PointerLockControls(camera, document.body);
 
-      // Build Map World & Objects
-      buildMapWorld();
+      // Membuat Lingkungan Kota Lengkap
+      buildHorrorCityEnvironment();
 
       setupEvents();
     }
 
 
     // ==========================================
-    // 5. PEMBUATAN PETA & OBJEK 3D
+    // 5. PENYUSUNAN LINGKUNGAN KOTA (CITY ENVIRONMENT)
     // ==========================================
-    function buildMapWorld() {
+    function buildHorrorCityEnvironment() {
       // Materials
-      const groundMat = new THREE.MeshStandardMaterial({ color: 0x110c0c, roughness: 0.9 });
-      const wallMat = new THREE.MeshStandardMaterial({ color: 0x1a1212, roughness: 0.8 });
-      const doorMat = new THREE.MeshStandardMaterial({ color: 0x330000, metalness: 0.8, roughness: 0.3 });
+      const roadMat = new THREE.MeshStandardMaterial({ color: 0x141016, roughness: 0.8 });
+      const sidewalkMat = new THREE.MeshStandardMaterial({ color: 0x221c24, roughness: 0.9 });
+      const bldgMat = new THREE.MeshStandardMaterial({ color: 0x120c16, roughness: 0.9 });
+      const roofMat = new THREE.MeshStandardMaterial({ color: 0x0a060e, roughness: 0.7 });
+      const windowMat = new THREE.MeshStandardMaterial({ color: 0xffaa33, emissive: 0x884400, emissiveIntensity: 0.5 });
+      const doorMat = new THREE.MeshStandardMaterial({ color: 0x3d0a0a, metalness: 0.7, roughness: 0.4 });
+      const boneMat = new THREE.MeshStandardMaterial({ color: 0xddddcc, roughness: 0.5 });
       const goreMat = new THREE.MeshStandardMaterial({ color: 0x660000, roughness: 0.2 });
-      const boneMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.5 });
-      const tableMat = new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.5 });
 
-      // Ground / Lantai Peta
-      const ground = new THREE.Mesh(new THREE.PlaneGeometry(120, 300), groundMat);
-      ground.rotation.x = -Math.PI / 2;
-      ground.position.z = -100;
-      scene.add(ground);
+      // --- A. BULAN BERDARAH (BLOOD MOON) & LANGIT MALAM ---
+      const moonGeo = new THREE.SphereGeometry(14, 32, 32);
+      const moonMat = new THREE.MeshBasicMaterial({ color: 0xff3322 });
+      const moon = new THREE.Mesh(moonGeo, moonMat);
+      moon.position.set(40, 60, -220);
+      scene.add(moon);
 
-      // --- DINDING LORONG UTAMA (Membuat Map Terisolasi) ---
-      const createWall = (w, h, d, x, y, z) => {
-        const wall = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), wallMat);
-        wall.position.set(x, y, z);
-        scene.add(wall);
-      };
+      const moonLight = new THREE.DirectionalLight(0xff4433, 0.4);
+      moonLight.position.set(40, 60, -220);
+      scene.add(moonLight);
 
-      // Dinding Luar Kiri Kanan Lorong
-      for (let z = 10; z >= -220; z -= 20) {
-        createWall(2, 8, 20, -12, 4, z);
-        createWall(2, 8, 20, 12, 4, z);
+      // Bintang-Bintang Malam Redup
+      const starsGeo = new THREE.BufferGeometry();
+      const starCoords = [];
+      for (let i = 0; i < 300; i++) {
+        starCoords.push(
+          (Math.random() - 0.5) * 400,
+          20 + Math.random() * 100,
+          (Math.random() - 0.5) * 400
+        );
+      }
+      starsGeo.setAttribute('position', new THREE.Float32BufferAttribute(starCoords, 3));
+      const starsMat = new THREE.PointsMaterial({ color: 0xaaaaff, size: 0.6 });
+      const starField = new THREE.Points(starsGeo, starsMat);
+      scene.add(starField);
+
+      // --- B. JALAN RAYA & TROTOAR KOTA ---
+      // Jalan Utama
+      const road = new THREE.Mesh(new THREE.PlaneGeometry(16, 260), roadMat);
+      road.rotation.x = -Math.PI / 2;
+      road.position.set(0, 0, -100);
+      scene.add(road);
+
+      // Trotoar Kiri & Kanan
+      const swLeft = new THREE.Mesh(new THREE.BoxGeometry(4, 0.3, 260), sidewalkMat);
+      swLeft.position.set(-10, 0.15, -100);
+      scene.add(swLeft);
+
+      const swRight = new THREE.Mesh(new THREE.BoxGeometry(4, 0.3, 260), sidewalkMat);
+      swRight.position.set(10, 0.15, -100);
+      scene.add(swRight);
+
+
+      // --- C. SILUET BANGUNAN KOTA MALAM (BACKGROUND & FOREGROUND) ---
+      // 1. Gedung-Gedung Latar Belakang (Skyline Kota Malam)
+      for (let i = 0; i < 35; i++) {
+        const bgWidth = 12 + Math.random() * 15;
+        const bgHeight = 20 + Math.random() * 35;
+        const bgDepth = 12 + Math.random() * 15;
+
+        // Kiri Jauh
+        const bldL = new THREE.Mesh(new THREE.BoxGeometry(bgWidth, bgHeight, bgDepth), bldgMat);
+        bldL.position.set(-35 - Math.random() * 25, bgHeight / 2, 20 - i * 12);
+        scene.add(bldL);
+
+        // Kanan Jauh
+        const bldR = new THREE.Mesh(new THREE.BoxGeometry(bgWidth, bgHeight, bgDepth), bldgMat);
+        bldR.position.set(35 + Math.random() * 25, bgHeight / 2, 20 - i * 12);
+        scene.add(bldR);
       }
 
-      // --- SEKTOR 1: GERBANG AWAL & POS MEDIS (Z: 0 s/d -40) ---
-      // Pos Medis (Rumah Kecil di Kanan Z: -20)
-      createWall(8, 6, 10, 8, 3, -20);
-      
-      // Meja Bedah Pos Medis
-      const table = new THREE.Mesh(new THREE.BoxGeometry(2, 1, 3), tableMat);
-      table.position.set(7, 0.5, -20);
-      scene.add(table);
+      // 2. Rumah/Bangunan Tua Pinggir Jalan (Foreground Sektor 1, 2, 3)
+      for (let z = 10; z >= -210; z -= 18) {
+        // Skip area tertentu untuk gerbang dan klinik
+        if (z === -40 || z === -120 || z === -160) continue;
 
-      // ITEM: Kunci Pos Medis di Meja
-      const keyMesh1 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.1, 0.3), new THREE.MeshBasicMaterial({ color: 0xffaa00 }));
-      keyMesh1.position.set(7, 1.1, -20);
-      keyMesh1.name = 'key_pos';
-      keyMesh1.userData = storyData['key_pos'];
-      scene.add(keyMesh1);
-      interactables.push(keyMesh1);
+        const hL = 8 + Math.random() * 6;
+        const hR = 8 + Math.random() * 6;
 
-      // CATATAN 1: Aroma Pembusukan (Awal Z: -5)
+        // Rumah Kiri
+        const houseL = new THREE.Mesh(new THREE.BoxGeometry(10, hL, 14), bldgMat);
+        houseL.position.set(-17, hL / 2, z);
+        scene.add(houseL);
+
+        // Jendela Berkerlip di Rumah Kiri
+        if (Math.random() > 0.4) {
+          const win = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.8), windowMat);
+          win.position.set(-11.9, hL / 2 + 0.5, z + (Math.random() - 0.5) * 4);
+          win.rotation.y = Math.PI / 2;
+          scene.add(win);
+        }
+
+        // Rumah Kanan
+        const houseR = new THREE.Mesh(new THREE.BoxGeometry(10, hR, 14), bldgMat);
+        houseR.position.set(17, hR / 2, z);
+        scene.add(houseR);
+
+        // Jendela Rumah Kanan
+        if (Math.random() > 0.4) {
+          const win = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.8), windowMat);
+          win.position.set(11.9, hR / 2 + 0.5, z + (Math.random() - 0.5) * 4);
+          win.rotation.y = -Math.PI / 2;
+          scene.add(win);
+        }
+      }
+
+      // --- D. TIANG LAMPU JALAN REMANG-REMANG ---
+      for (let z = 5; z >= -200; z -= 25) {
+        const poleGeo = new THREE.CylinderGeometry(0.12, 0.15, 6);
+        const poleMat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8 });
+        
+        // Lampu Kiri
+        const poleL = new THREE.Mesh(poleGeo, poleMat);
+        poleL.position.set(-8.5, 3, z);
+        scene.add(poleL);
+
+        const lightL = new THREE.PointLight(0xffaa44, 1.2, 14);
+        lightL.position.set(-8.5, 5.8, z);
+        scene.add(lightL);
+        flickeringLights.push(lightL);
+
+        // Bohlam Lampu Visual
+        const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffaa44 }));
+        bulb.position.set(-8.5, 5.8, z);
+        scene.add(bulb);
+      }
+
+
+      // --- E. SPESIFIK OBJEK CERITA & SEKTOR ---
+
+      // 1. Catatan Bau Busuk (Awal Z: -5)
       const note1 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.6, 0.1), new THREE.MeshBasicMaterial({ color: 0xdddddd }));
-      note1.position.set(-3, 1.5, -5);
+      note1.position.set(-3, 1.3, -5);
       note1.userData = storyData['smell_intro'];
       scene.add(note1);
       interactables.push(note1);
 
-      // GERBANG 1 (Menghalangi Lorong di Z: -40)
-      gate1Mesh = new THREE.Mesh(new THREE.BoxGeometry(22, 7, 0.8), doorMat);
+      // 2. KLINIK / POS MEDIS TUA (Kanan Z: -22)
+      const clinic = new THREE.Mesh(new THREE.BoxGeometry(10, 6, 12), bldgMat);
+      clinic.position.set(16, 3, -22);
+      scene.add(clinic);
+
+      const table = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1, 3), new THREE.MeshStandardMaterial({ color: 0x444444 }));
+      table.position.set(9.5, 0.5, -22);
+      scene.add(table);
+
+      // ITEM: Kunci Pos Medis
+      const keyMesh1 = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.1, 0.35), new THREE.MeshBasicMaterial({ color: 0xffaa00 }));
+      keyMesh1.position.set(9.5, 1.1, -22);
+      keyMesh1.userData = storyData['key_pos'];
+      scene.add(keyMesh1);
+      interactables.push(keyMesh1);
+
+      // GERBANG 1 (Z: -40)
+      gate1Mesh = new THREE.Mesh(new THREE.BoxGeometry(20, 7, 0.8), doorMat);
       gate1Mesh.position.set(0, 3.5, -40);
       gate1Mesh.name = 'gate1';
       gate1Mesh.userData = storyData['gate_pos'];
       scene.add(gate1Mesh);
       interactables.push(gate1Mesh);
 
-
-      // --- SEKTOR 2: AREA PEMBUANG MAYAT & WORKER (Z: -40 s/d -110) ---
-      // Pekerja NPC (Sosok Hitam di Z: -75)
-      const workerMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 2), new THREE.MeshStandardMaterial({ color: 0x111111 }));
-      workerMesh.position.set(2, 1, -75);
+      // 3. SEKTOR PEMBUANGAN MAYAT (Z: -75 s/d -100)
+      const workerMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 2), new THREE.MeshStandardMaterial({ color: 0x0a0a0a }));
+      workerMesh.position.set(2.5, 1, -75);
       workerMesh.userData = storyData['worker_npc'];
       scene.add(workerMesh);
       interactables.push(workerMesh);
 
-      // Gerobak Mayat
-      const cart = new THREE.Mesh(new THREE.BoxGeometry(3, 1.2, 2), tableMat);
+      // Gerobak Mayat & Organ
+      const cart = new THREE.Mesh(new THREE.BoxGeometry(3, 1.2, 2.2), new THREE.MeshStandardMaterial({ color: 0x2a1a1a }));
       cart.position.set(0, 0.6, -75);
       scene.add(cart);
 
-      // Tumpukan Tengkorak & Usus (Z: -100)
-      for (let i = 0; i < 20; i++) {
+      // Tumpukan Tengkorak & Gore
+      for (let i = 0; i < 22; i++) {
         const skull = new THREE.Mesh(new THREE.SphereGeometry(0.25, 8, 8), boneMat);
         skull.position.set(-6 + Math.random() * 6, 0.2, -98 + Math.random() * 5);
         scene.add(skull);
@@ -525,38 +623,35 @@
         scene.add(blood);
       }
 
-      // CATATAN 2: Tengkorak Saraf (Z: -100)
       const note2 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), boneMat);
       note2.position.set(-3, 0.5, -100);
       note2.userData = storyData['skulls_note'];
       scene.add(note2);
       interactables.push(note2);
 
-      // GERBANG 2: Gerbang Altar (Menghalangi Z: -120)
-      gate2Mesh = new THREE.Mesh(new THREE.BoxGeometry(22, 8, 0.8), doorMat);
+      // GERBANG 2: Gerbang Altar (Z: -120)
+      gate2Mesh = new THREE.Mesh(new THREE.BoxGeometry(20, 8, 0.8), doorMat);
       gate2Mesh.position.set(0, 4, -120);
       gate2Mesh.name = 'gate2';
       gate2Mesh.userData = storyData['gate_altar'];
       scene.add(gate2Mesh);
       interactables.push(gate2Mesh);
 
+      // 4. MANSION ALTAR UTAMA HADIWIJAYA (Z: -160)
+      const mansionFront = new THREE.Mesh(new THREE.BoxGeometry(28, 14, 2), bldgMat);
+      mansionFront.position.set(0, 7, -170);
+      scene.add(mansionFront);
 
-      // --- SEKTOR 3: MANSION & ALTAR UTAMA HADIWIJAYA (Z: -120 s/d -170) ---
-      // Ruang Altar Besar
-      createWall(26, 12, 1, 0, 6, -170); // Dinding Belakang Mansion
-      
-      // Meja Altar Utama Rahasia
-      const altarTable = new THREE.Mesh(new THREE.BoxGeometry(5, 1.2, 2.5), new THREE.MeshStandardMaterial({ color: 0x2a0000 }));
+      const altarTable = new THREE.Mesh(new THREE.BoxGeometry(5.5, 1.2, 2.5), new THREE.MeshStandardMaterial({ color: 0x330000 }));
       altarTable.position.set(0, 0.6, -160);
       scene.add(altarTable);
 
-      // Lampu Merah Mistik Altar
-      const redLight = new THREE.PointLight(0xff0000, 3, 20);
+      const redLight = new THREE.PointLight(0xff0000, 3.5, 20);
       redLight.position.set(0, 4, -160);
       scene.add(redLight);
 
-      // OBJEK AKHIR: Dokumen Jurnal Hadiwijaya
-      const finalDoc = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.1, 0.6), new THREE.MeshStandardMaterial({ color: 0xff3333, emissive: 0x330000 }));
+      // Dokumen Akhir Rahasia Hadiwijaya
+      const finalDoc = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.1, 0.6), new THREE.MeshStandardMaterial({ color: 0xff2222, emissive: 0x440000 }));
       finalDoc.position.set(0, 1.3, -160);
       finalDoc.userData = storyData['final_altar'];
       scene.add(finalDoc);
@@ -631,7 +726,6 @@
     function checkRaycastInteraction() {
       if (isDialogActive) return;
 
-      // Raycast dari tengah kamera
       raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
       const intersects = raycaster.intersectObjects(interactables);
 
@@ -648,8 +742,8 @@
       // Update Teks Lokasi di HUD
       const z = camera.position.z;
       const locText = document.getElementById('location-text');
-      if (z > -40) locText.innerText = "Gerban Luar & Pos Medis";
-      else if (z > -120) locText.innerText = "Sektor Terisolasi / Tempat Pembuangan Mayat";
+      if (z > -40) locText.innerText = "Gerbang Luar & Klinik Tua";
+      else if (z > -120) locText.innerText = "Sektor Terisolasi / Pembuangan Mayat";
       else locText.innerText = "Mansion Altar Utama HADIWIJAYA";
     }
 
@@ -667,7 +761,6 @@
         playSoundEffect('pickup');
         openDialog(data.title, data.text);
 
-        // Hapus item dari peta
         scene.remove(currentInteractable);
         const idx = interactables.indexOf(currentInteractable);
         if (idx > -1) interactables.splice(idx, 1);
@@ -685,11 +778,9 @@
           playSoundEffect('door');
           openDialog("Pintu Terbuka", "Kamu menggunakan kunci untuk membuka pintu ini.");
           
-          // Buka / Naikkan pintu ke atas
           if (currentInteractable.name === 'gate1') gate1Mesh.position.y += 8;
           if (currentInteractable.name === 'gate2') gate2Mesh.position.y += 8;
 
-          // Hapus interaksi pintu
           const idx = interactables.indexOf(currentInteractable);
           if (idx > -1) interactables.splice(idx, 1);
         } else {
@@ -750,16 +841,22 @@
           battery = Math.max(0, battery - delta * 1.2);
           document.getElementById('battery-fill').style.width = battery + '%';
 
-          // Senter redup / flickering saat baterai habis
-          if (battery < 20 && Math.random() < 0.1) {
+          if (battery < 20 && Math.random() < 0.12) {
             flashlight.intensity = Math.random() * 1.5;
           } else if (battery <= 0) {
             flashlightOn = false;
             flashlight.visible = false;
           } else {
-            flashlight.intensity = 3.5;
+            flashlight.intensity = 3.8;
           }
         }
+
+        // --- Efek Kerlip Lampu Jalan ---
+        flickeringLights.forEach(light => {
+          if (Math.random() < 0.05) {
+            light.intensity = 0.2 + Math.random() * 1.2;
+          }
+        });
 
         // --- Pergerakan Player ---
         velocity.x -= velocity.x * 10.0 * delta;
@@ -776,11 +873,10 @@
         controls.moveRight(-velocity.x * delta);
         controls.moveForward(-velocity.z * delta);
 
-        // Batas Peta Jalan Lorong (Collision Sederhana)
-        camera.position.x = Math.max(-9, Math.min(9, camera.position.x));
+        // Membatasi Pergerakan Karakter di Jalanan Kota
+        camera.position.x = Math.max(-8, Math.min(8, camera.position.x));
         camera.position.z = Math.max(-165, Math.min(8, camera.position.z));
 
-        // Cek Interaksi Raycast
         checkRaycastInteraction();
       }
 
